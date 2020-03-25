@@ -11,7 +11,7 @@ Please install postgresql and create a user and a database.
 Before running the jar, please add a application.properties file to describe your configuration. there is an example:
 
 ------------------
-
+```
 # ===============================
 # = DATA SOURCE
 # ===============================
@@ -38,6 +38,6 @@ spring.jpa.hibernate.naming.physical-strategy=org.springframework.boot.orm.jpa.h
 
 # Allows Hibernate to generate SQL optimized for a particular DBMS
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-
+```
 
 ------------------
