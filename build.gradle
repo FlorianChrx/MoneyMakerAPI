@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.florianchiraux'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 sourceCompatibility = '8'
 
 repositories {
@@ -25,4 +25,8 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+bootJar {
+	launchScript()
 }
