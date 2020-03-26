@@ -20,7 +20,7 @@ public class TransactionController {
     @Autowired
     private TraderRepo traderRepo;
 
-    @PostMapping(path = "/addTransaction/{trader}")
+    @PostMapping(path = "/{trader}/transactions/add")
     public @ResponseBody
     String addNewTransaction(@PathVariable String trader, @RequestParam String pwd, @RequestParam double amount
             , @RequestParam double price, @RequestParam String type) {
@@ -28,7 +28,11 @@ public class TransactionController {
         Optional<Trader> trader1 = traderRepo.findById(trader);
         Trader trader2 = trader1.get();
         if (!trader2.getPwd().equals(pwd)) {
-            return "Authentication failed !";
+            return "Error: Authentication failed !";
+        }
+
+        if (!(type.equalsIgnoreCase("buy") || type.equalsIgnoreCase("sell"))) {
+            return "Error: Unknown transaction type";
         }
 
         Transaction n = new Transaction(trader2, amount, price, type);
@@ -36,7 +40,7 @@ public class TransactionController {
         return "Saved";
     }
 
-    @GetMapping(path = "/transactions/{trader}")
+    @GetMapping(path = "/{trader}/transactions")
     public @ResponseBody
     Iterable<Transaction> getAllTransactionsOfTrader(@PathVariable String trader, @RequestParam String pwd) {
         Iterable<Transaction> transactions = transactionRepo.findAll();
@@ -49,14 +53,9 @@ public class TransactionController {
         return result;
     }
 
-    @GetMapping(path = "/average/{trader}")
-    public @ResponseBody double getAveragePriceOfTrader(@PathVariable String trader, @RequestParam String pwd, @RequestParam String type) {
-        return FIFOCalculator.getAveragePrice(getAllTransactionsOfTrader(trader, pwd), type);
-    }
-
-    @GetMapping(path = "/transactions")
+    @GetMapping(path = "/{trader}/average")
     public @ResponseBody
-    Iterable<Transaction> getAllTransactions() {
-        return transactionRepo.findAll();
+    double getAveragePriceOfTrader(@PathVariable String trader, @RequestParam String pwd, @RequestParam String type) {
+        return FIFOCalculator.getAveragePrice(getAllTransactionsOfTrader(trader, pwd), type);
     }
 }
