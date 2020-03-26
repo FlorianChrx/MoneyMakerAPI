@@ -13,8 +13,8 @@ public class TraderController {
 
     @PostMapping(path = "/addTrader")
     public @ResponseBody
-    String addNewTransaction(@RequestParam String name) {
-        Trader n = new Trader(name);
+    String addNewTrader(@RequestParam String name, @RequestParam String pwd) {
+        Trader n = new Trader(name, pwd);
         traderRepo.save(n);
         return "Trader registered";
     }

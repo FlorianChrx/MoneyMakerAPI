@@ -1,5 +1,6 @@
 package com.florianchiraux.MoneyMakerAPI.controllers;
 
+import com.florianchiraux.MoneyMakerAPI.model.FIFOCalculator;
 import com.florianchiraux.MoneyMakerAPI.model.Trader;
 import com.florianchiraux.MoneyMakerAPI.model.Transaction;
 import com.florianchiraux.MoneyMakerAPI.repositories.TraderRepo;
@@ -19,29 +20,38 @@ public class TransactionController {
     @Autowired
     private TraderRepo traderRepo;
 
-    @PostMapping(path = "/addTransaction")
+    @PostMapping(path = "/addTransaction/{trader}")
     public @ResponseBody
-    String addNewTransaction(@RequestParam String name, @RequestParam double amount
+    String addNewTransaction(@PathVariable String trader, @RequestParam String pwd, @RequestParam double amount
             , @RequestParam double price, @RequestParam String type) {
 
-        Optional<Trader> trader = traderRepo.findById(name);
+        Optional<Trader> trader1 = traderRepo.findById(trader);
+        Trader trader2 = trader1.get();
+        if (!trader2.getPwd().equals(pwd)) {
+            return "Authentication failed !";
+        }
 
-        Transaction n = new Transaction(trader.get(), amount, price, type);
+        Transaction n = new Transaction(trader2, amount, price, type);
         transactionRepo.save(n);
         return "Saved";
     }
 
     @GetMapping(path = "/transactions/{trader}")
     public @ResponseBody
-    Iterable<Transaction> getAllTransactionsOfTrader(@PathVariable String trader) {
+    Iterable<Transaction> getAllTransactionsOfTrader(@PathVariable String trader, @RequestParam String pwd) {
         Iterable<Transaction> transactions = transactionRepo.findAll();
         List<Transaction> result = new ArrayList<Transaction>();
         for (Transaction t : transactions) {
-            if (t.getTrader().equals(traderRepo.findById(trader))) {
+            if (t.getTrader().getId().equals(trader)) {
                 result.add(t);
             }
         }
         return result;
+    }
+
+    @GetMapping(path = "/average/{trader}")
+    public @ResponseBody double getAveragePriceOfTrader(@PathVariable String trader, @RequestParam String pwd, @RequestParam String type) {
+        return FIFOCalculator.getAveragePrice(getAllTransactionsOfTrader(trader, pwd), type);
     }
 
     @GetMapping(path = "/transactions")
