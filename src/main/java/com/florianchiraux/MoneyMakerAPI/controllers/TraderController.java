@@ -20,4 +20,15 @@ public class TraderController {
         traderRepo.save(n);
         return "Trader registered";
     }
+
+    @PostMapping(path = "/{trader}/password/{newPwd}")
+    public @ResponseBody
+    String changePassword(@PathVariable String name, @PathVariable String newPwd, @RequestParam String oldPwd) {
+        if (!traderRepo.existsById(name)) {
+            return "Error: Trader not found";
+        }
+        Trader trader = traderRepo.findById(name).get();
+        traderRepo.save(trader);
+        return "Password has been changed";
+    }
 }
