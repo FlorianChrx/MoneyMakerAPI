@@ -20,6 +20,18 @@ public class TransactionController {
     @Autowired
     private TraderRepo traderRepo;
 
+    @PostMapping(path = "{trader}/transactions/remove/{id}")
+    public @ResponseBody String removeTransaction(@PathVariable int id, @PathVariable String trader, @RequestParam String pwd){
+        Iterable<Transaction> transactions = getAllTransactionsOfTrader(trader, pwd);
+        for (Transaction t: transactions) {
+            if (t.getId() == id) {
+                transactionRepo.deleteById(id);
+                return "Transaction deleted";
+            }
+        }
+        return "Transaction not found";
+    }
+
     @PostMapping(path = "/{trader}/transactions/add")
     public @ResponseBody
     String addNewTransaction(@PathVariable String trader, @RequestParam String pwd, @RequestParam double amount
@@ -40,7 +52,7 @@ public class TransactionController {
         return "Saved";
     }
 
-    @GetMapping(path = "/{trader}/transactions")
+    @PostMapping(path = "/{trader}/transactions")
     public @ResponseBody
     Iterable<Transaction> getAllTransactionsOfTrader(@PathVariable String trader, @RequestParam String pwd) {
         Iterable<Transaction> transactions = transactionRepo.findAll();
@@ -53,7 +65,7 @@ public class TransactionController {
         return result;
     }
 
-    @GetMapping(path = "/{trader}/average")
+    @PostMapping(path = "/{trader}/average")
     public @ResponseBody
     double getAveragePriceOfTrader(@PathVariable String trader, @RequestParam String pwd, @RequestParam String type) {
         return FIFOCalculator.getAveragePrice(getAllTransactionsOfTrader(trader, pwd), type);
