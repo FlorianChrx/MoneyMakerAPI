@@ -10,6 +10,19 @@ public class TraderController {
     @Autowired
     private TraderRepo traderRepo;
 
+    @PostMapping(path = "/traders/auth/{name}")
+    public @ResponseBody
+    boolean auth(@PathVariable String name, @RequestParam String pwd) {
+        if (!traderRepo.existsById(name)) {
+            return false;
+        }
+        Trader trader = traderRepo.findById(name).get();
+        if(trader.getPwd().equals(pwd)) {
+            return true;
+        }
+        return false;
+    }
+
     @PostMapping(path = "/traders/add/{name}")
     public @ResponseBody
     String addNewTrader(@PathVariable String name, @RequestParam String pwd) {
@@ -24,9 +37,7 @@ public class TraderController {
     @PostMapping(path = "/{trader}/password/{newPwd}")
     public @ResponseBody
     String changePassword(@PathVariable String name, @PathVariable String newPwd, @RequestParam String oldPwd) {
-        if (!traderRepo.existsById(name)) {
-            return "Error: Trader not found";
-        }
+        if (!auth(name, oldPwd)) return "Authentication failed";
         Trader trader = traderRepo.findById(name).get();
         traderRepo.save(trader);
         return "Password has been changed";

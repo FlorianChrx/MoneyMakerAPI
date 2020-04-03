@@ -18,7 +18,7 @@ public class TransactionController {
     private TransactionRepo transactionRepo;
 
     @Autowired
-    private TraderRepo traderRepo;
+    private TraderController traderController;
 
     @PostMapping(path = "{trader}/transactions/remove/{id}")
     public @ResponseBody String removeTransaction(@PathVariable int id, @PathVariable String trader, @RequestParam String pwd){
@@ -37,17 +37,13 @@ public class TransactionController {
     String addNewTransaction(@PathVariable String trader, @RequestParam String pwd, @RequestParam double amount
             , @RequestParam double price, @RequestParam String type) {
 
-        Optional<Trader> trader1 = traderRepo.findById(trader);
-        Trader trader2 = trader1.get();
-        if (!trader2.getPwd().equals(pwd)) {
-            return "Error: Authentication failed !";
-        }
+        if(!traderController.auth(trader, pwd)) return "Authentication failed";
 
         if (!(type.equalsIgnoreCase("buy") || type.equalsIgnoreCase("sell"))) {
             return "Error: Unknown transaction type";
         }
 
-        Transaction n = new Transaction(trader2, amount, price, type);
+        Transaction n = new Transaction(new Trader(trader, pwd), amount, price, type);
         transactionRepo.save(n);
         return "Saved";
     }
@@ -55,14 +51,8 @@ public class TransactionController {
     @PostMapping(path = "/{trader}/transactions")
     public @ResponseBody
     Iterable<Transaction> getAllTransactionsOfTrader(@PathVariable String trader, @RequestParam String pwd) {
-        Iterable<Transaction> transactions = transactionRepo.findAll();
-        List<Transaction> result = new ArrayList<Transaction>();
-        for (Transaction t : transactions) {
-            if (t.getTrader().getId().equals(trader)) {
-                result.add(t);
-            }
-        }
-        return result;
+        if(!traderController.auth(trader, pwd)) return null;
+        return transactionRepo.findAllByTrader(trader);
     }
 
     @PostMapping(path = "/{trader}/average")
